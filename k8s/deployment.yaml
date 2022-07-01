@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  labels:
+    app: opentelemetry
+    component: otel-collector
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry
+      component: otel-collector
+  minReadySeconds: 5
+  progressDeadlineSeconds: 120
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: opentelemetry
+        component: otel-collector
+    spec:
+      serviceAccountName: otel-collector-account
+      containers:
+      - name: gen
+        image: arm64v8/ubuntu:22.10
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+        - name: otlpgen
+          mountPath: /otlpgen
+      - name: collector
+        command:
+          - "/otelcol-contrib"
+          - "--config=/conf/otel-agent-config.yaml"
+        image: otel/opentelemetry-collector-contrib:0.54.0
+        name: otel-collector
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 400Mi
+        ports:
+        - containerPort: 55679 # Default endpoint for ZPages.
+        - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
+        - containerPort: 14250 # Default endpoint for Jaeger gRPC receiver.
+        - containerPort: 14268 # Default endpoint for Jaeger HTTP receiver.
+        - containerPort: 9411 # Default endpoint for Zipkin receiver.
+        - containerPort: 8888  # Default endpoint for querying metrics.
+        volumeMounts:
+        - name: otel-agent-config-vol
+          mountPath: /conf
+      volumes:
+      - name: otlpgen
+        hostPath:
+          path: /otlpgen # make mount
+      - name: otel-agent-config-vol
+        configMap:
+          name: otel-agent-conf
+          items:
+            - key: otel-agent-config
+              path: otel-agent-config.yaml
