@@ -15,8 +15,15 @@ data:
     exporters:
       datadog:
         api:
-          key: <KEY_HERE>
+          key: <REPLACE_ME>
     processors:
+      # The resource detector injects the pod IP
+      # to every metric so that the k8sattributes can
+      # fetch information afterwards.
+      resourcedetection:
+        detectors: [env]
+        timeout: 5s
+        override: false
       k8sattributes:
       batch:
         # The 10s timeout is necessary for the traces stats to work properly.
@@ -37,5 +44,5 @@ data:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [memory_limiter, k8sattributes, batch]
+          processors: [memory_limiter, resourcedetection, k8sattributes, batch]
           exporters: [datadog]
