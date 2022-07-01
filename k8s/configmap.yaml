@@ -21,7 +21,7 @@ data:
       # to every metric so that the k8sattributes can
       # fetch information afterwards.
       resourcedetection:
-        detectors: [env]
+        detectors: [system, env]
         timeout: 5s
         override: false
       k8sattributes:
