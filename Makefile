@@ -9,5 +9,9 @@ mount:
 
 # Applies the k8s deployment.
 # Run 'mount' first.
-deploy:
+apply:
 	kubectl apply -f ./k8s
+
+# destroy deletes the deployment
+delete:
+	kubectl delete -f ./k8s

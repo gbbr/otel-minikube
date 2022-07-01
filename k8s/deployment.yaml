@@ -23,17 +23,21 @@ spec:
       containers:
       - name: gen
         image: arm64v8/ubuntu:22.10
-        command: [ "/bin/bash", "-c", "--" ]
-        args: [ "while true; do sleep 30; done;" ]
+        command: [ "/otlpgen/otlpgen" ]
         volumeMounts:
         - name: otlpgen
           mountPath: /otlpgen
+        env:
+        - name: KUBE_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
       - name: collector
         command:
           - "/otelcol-contrib"
           - "--config=/conf/otel-agent-config.yaml"
         image: otel/opentelemetry-collector-contrib:0.54.0
-        name: otel-collector
         resources:
           limits:
             cpu: 1
