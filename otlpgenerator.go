@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"go.opentelemetry.io/contrib/detectors/aws/ec2"
@@ -15,6 +16,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -84,15 +86,20 @@ func bootstrap() (tracer trace.Tracer, stop func()) {
 
 func main() {
 	ctx := context.Background()
+	log.Println("Bootstrapping...")
 	tracer, stop := bootstrap()
 	defer stop()
+	log.Println("Ready!")
+	nums := []int{1, 2, 3}
+	codes := []int{http.StatusOK, http.StatusBadRequest, http.StatusFound}
 
-	var n int
 	for {
-		n++
+		n := nums[rand.Intn(len(nums))]
+		code := codes[rand.Intn(len(codes))]
 		ctx1, span := tracer.Start(ctx, fmt.Sprintf("operation%d", n), trace.WithAttributes(
 			attribute.Bool("mybool", false),
 			attribute.Int("myint", 1),
+			semconv.HTTPStatusCodeKey.Int(code),
 			attribute.Float64("myfloat64", 2),
 			attribute.String("mystring", "asd"),
 		))
@@ -115,6 +122,7 @@ func main() {
 			span.End()
 		}
 		span.End()
+		time.Sleep(500 * time.Millisecond)
 		fmt.Print(".")
 	}
 }
