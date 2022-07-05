@@ -52,9 +52,6 @@ func bootstrap() (tracer trace.Tracer, stop func()) {
 		}
 	}
 	res1, err := resource.New(ctx,
-		resource.WithFromEnv(),
-		resource.WithProcess(),
-		resource.WithDetectors(),
 		resource.WithContainer(),
 		resource.WithDetectors(ec2.NewResourceDetector()),
 	)

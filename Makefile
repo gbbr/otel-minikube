@@ -2,10 +2,12 @@
 # with minikube.
 #
 # Run this as a prerequisite to deploy.
-mount:
+mount: bin
+	minikube mount .:/otlpgen
+
+bin:
 	mkdir -p ./k8s/bin
-	GOOS=linux GOARCH=arm64 go build -o ./k8s/bin/otlpgen ./otlpgenerator.go
-	minikube mount ./k8s/bin:/otlpgen
+	GOOS=linux GOARCH=amd64 go build -o ./k8s/bin/otlpgen ./otlpgenerator.go
 
 # Applies the k8s deployment.
 # Run 'mount' first.
@@ -15,3 +17,6 @@ apply:
 # destroy deletes the deployment
 delete:
 	kubectl delete -f ./k8s
+
+run:
+	go run ./otlpgenerator.go

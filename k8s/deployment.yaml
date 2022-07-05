@@ -22,17 +22,11 @@ spec:
       serviceAccountName: otel-collector-account
       containers:
       - name: gen
-        image: arm64v8/ubuntu:22.10
-        command: [ "/otlpgen/otlpgen" ]
+        image: golang:1.18
+        command: [ "/otlpgen/k8s/bin/otlpgen" ]
         volumeMounts:
         - name: otlpgen
           mountPath: /otlpgen
-        env:
-        - name: KUBE_NODE_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: spec.nodeName
       - name: collector
         command:
           - "/otelcol-contrib"
@@ -47,13 +41,13 @@ spec:
             memory: 400Mi
         env:
          # Get pod ip so that k8sattributes can tag resources
-        - name: POD_IP
+        - name: POD_UID
           valueFrom:
             fieldRef:
-              fieldPath: status.podIP
+              fieldPath: metadata.uid
           # This is picked up by the resource detector
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "k8s.pod_ip=$(POD_IP)"
+          value: "k8s.pod.uid=$(POD_UID)"
         ports:
         - containerPort: 55679 # Default endpoint for ZPages.
         - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
@@ -67,7 +61,7 @@ spec:
       volumes:
       - name: otlpgen
         hostPath:
-          path: /otlpgen # make mount
+          path: /otlpgen # run make mount for this to work
       - name: otel-agent-config-vol
         configMap:
           name: otel-agent-conf
