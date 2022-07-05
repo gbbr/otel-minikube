@@ -25,6 +25,8 @@ data:
         pod_association:
           - from: resource_attribute
             name: k8s.pod.uid
+        filter:
+          node_from_env_var: KUBE_NODE_NAME
       batch:
         timeout: 10s
     service:

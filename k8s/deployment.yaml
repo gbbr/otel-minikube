@@ -27,6 +27,7 @@ spec:
         volumeMounts:
         - name: otlpgen
           mountPath: /otlpgen
+
       - name: collector
         command:
           - "/otelcol-contrib"
@@ -48,6 +49,11 @@ spec:
           # This is picked up by the resource detector
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "k8s.pod.uid=$(POD_UID)"
+        - name: KUBE_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
         ports:
         - containerPort: 55679 # Default endpoint for ZPages.
         - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
