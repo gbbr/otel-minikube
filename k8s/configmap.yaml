@@ -23,12 +23,8 @@ data:
         detectors: [system, env, docker]
         timeout: 5s
         override: false
+      # adds various tags related to k8s
       k8sattributes:
-        # associate to pods using the k8s.pod.uid resource attribute
-        # set by each pod's template
-        pod_association:
-          - from: resource_attribute
-            name: k8s.pod.uid
       batch:
         timeout: 10s
     service:

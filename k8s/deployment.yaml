@@ -41,13 +41,13 @@ spec:
             cpu: 200m
             memory: 400Mi
         env:
-        - name: POD_UID
+        - name: POD_IP
           valueFrom:
             fieldRef:
-              fieldPath: metadata.uid
-        # The k8s.pod.uid is used to associate pods for k8sattributes
+              fieldPath: status.podIP
+        # The k8s.pod.ip is used to associate pods for k8sattributes
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "k8s.pod.uid=$(POD_UID)"
+          value: "k8s.pod.ip=$(POD_IP)"
         ports:
         - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
         - containerPort: 8888  # Default endpoint for querying metrics.
