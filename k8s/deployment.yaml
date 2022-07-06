@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: otel-collector
+  name: app
   labels:
     app: opentelemetry
     component: otel-collector
