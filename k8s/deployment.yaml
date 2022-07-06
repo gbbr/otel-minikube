@@ -19,7 +19,6 @@ spec:
         app: opentelemetry
         component: otel-collector
     spec:
-      serviceAccountName: otel-collector-account
       containers:
       - name: gen
         image: golang:1.18
@@ -27,40 +26,14 @@ spec:
         volumeMounts:
         - name: otlpgen
           mountPath: /otlpgen
-
-      - name: collector
-        command:
-          - "/otelcol-contrib"
-          - "--config=/conf/otel-agent-config.yaml"
-        image: otel/opentelemetry-collector-contrib:0.54.0
-        resources:
-          limits:
-            cpu: 1
-            memory: 2Gi
-          requests:
-            cpu: 200m
-            memory: 400Mi
         env:
-        - name: POD_IP
+        - name: HOST_IP
           valueFrom:
             fieldRef:
-              fieldPath: status.podIP
-        # The k8s.pod.ip is used to associate pods for k8sattributes
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "k8s.pod.ip=$(POD_IP)"
-        ports:
-        - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
-        - containerPort: 8888  # Default endpoint for querying metrics.
-        volumeMounts:
-        - name: otel-agent-config-vol
-          mountPath: /conf
+              fieldPath: status.hostIP
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://$(HOST_IP):4318"
       volumes:
       - name: otlpgen
         hostPath:
           path: /otlpgen
-      - name: otel-agent-config-vol
-        configMap:
-          name: otel-agent-conf
-          items:
-            - key: otel-agent-config
-              path: otel-agent-config.yaml

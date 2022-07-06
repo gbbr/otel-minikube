@@ -11,8 +11,6 @@ import (
 
 	"go.opentelemetry.io/contrib/detectors/aws/ec2"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -26,30 +24,13 @@ func bootstrap() (tracer trace.Tracer, stop func()) {
 	flag.Parse()
 	ctx := context.Background()
 	headers := map[string]string{"Custom-Header": "Custom-Value"}
-	var (
-		exporter *otlptrace.Exporter
-		err      error
+	exporter, err := otlptracehttp.New(
+		ctx,
+		otlptracehttp.WithInsecure(),
+		otlptracehttp.WithHeaders(headers),
 	)
-	if *grpcDriver {
-		client := otlptracegrpc.NewClient(
-			otlptracegrpc.WithEndpoint("0.0.0.0:4317"),
-			otlptracegrpc.WithInsecure(),
-			otlptracegrpc.WithHeaders(headers),
-		)
-		exporter, err = otlptrace.New(ctx, client)
-		if err != nil {
-			log.Fatalf("failed to create exporter: %v", err)
-		}
-	} else {
-		exporter, err = otlptracehttp.New(
-			ctx,
-			otlptracehttp.WithEndpoint("0.0.0.0:4318"),
-			otlptracehttp.WithInsecure(),
-			otlptracehttp.WithHeaders(headers),
-		)
-		if err != nil {
-			log.Fatalf("Failed to create HTTP client: %v", err)
-		}
+	if err != nil {
+		log.Fatalf("Failed to create HTTP client: %v", err)
 	}
 	resource, err := resource.New(ctx,
 		resource.WithContainer(),
