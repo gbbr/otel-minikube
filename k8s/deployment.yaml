@@ -48,13 +48,6 @@ spec:
         # The k8s.pod.uid is used to associate pods for k8sattributes
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "k8s.pod.uid=$(POD_UID)"
-        # KUBE_NODE_NAME helps k8sattributes filter exclusively by this node,
-        # for this node.
-        - name: KUBE_NODE_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: spec.nodeName
         ports:
         - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
         - containerPort: 8888  # Default endpoint for querying metrics.
