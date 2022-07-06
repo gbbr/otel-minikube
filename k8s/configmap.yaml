@@ -18,13 +18,18 @@ data:
           key: <REPLACE_ME>
     processors:
       resourcedetection:
-        detectors: [system, env]
+        # ensures host.name and other important resource tags 
+        # get picked up
+        detectors: [system, env, docker]
         timeout: 5s
         override: false
       k8sattributes:
+        # associate to pods using the k8s.pod.uid resource attribute
+        # set by each pod's template
         pod_association:
           - from: resource_attribute
             name: k8s.pod.uid
+        # filter tags only by current node
         filter:
           node_from_env_var: KUBE_NODE_NAME
       batch:
