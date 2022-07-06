@@ -51,23 +51,18 @@ func bootstrap() (tracer trace.Tracer, stop func()) {
 			log.Fatalf("Failed to create HTTP client: %v", err)
 		}
 	}
-	res1, err := resource.New(ctx,
+	resource, err := resource.New(ctx,
 		resource.WithContainer(),
 		resource.WithDetectors(ec2.NewResourceDetector()),
+		resource.WithSchemaURL(semconv.SchemaURL),
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("my-service"),
+			semconv.ServiceVersionKey.String("1.2.3"),
+			semconv.DeploymentEnvironmentKey.String("staging"),
+		),
 	)
 	if err != nil {
 		log.Fatalf("failed to create exporter: %v", err)
-	}
-	resource, err := resource.Merge(
-		resource.NewSchemaless(
-			attribute.String("service.name", "my-service"),
-			attribute.String("service.version", "1.2.3"),
-			attribute.String("env", "staging"),
-		),
-		res1,
-	)
-	if err != nil {
-		log.Fatalf("failed to create resource: %v", err)
 	}
 	provider := sdktrace.NewTracerProvider(
 		sdktrace.WithSyncer(exporter),
